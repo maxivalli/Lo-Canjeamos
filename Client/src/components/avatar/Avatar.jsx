@@ -1,12 +1,14 @@
 /* eslint-disable react/prop-types */
 /* eslint-disable no-unused-vars */
-import React, {useState} from "react";
-import { Link } from "react-router-dom";
-import avatar from "../../assets/avatar.jpg";
-import PayModal from "../payModal/PayModal"
-import style from "./Avatar.module.css";
 
+import React, { useState } from "react";
+import avatar from "../../assets/avatar.jpg";
+import style from "./Avatar.module.css";
+import PayModal from "../payModal/PayModal";
+import { useAuth0 } from "@auth0/auth0-react";
 const Avatar = ({ userData, setAuth }) => {
+  const { user, logout: loguotAuth0 } = useAuth0();
+
   const logout = () => {
     localStorage.removeItem("token");
     setAuth(false);
@@ -25,18 +27,29 @@ const Avatar = ({ userData, setAuth }) => {
   return (
     <>
       <div className={style.avatar}>
-        <img src={avatar}></img>
-        <h3>{userData && userData.username}</h3>
-        <p>{userData && userData.email}</p>
+        <img src={(user && user.picture) || avatar}></img>
+        <h3>{userData ? userData.username : user && user.name}</h3>
+        <p>{userData.email || user.email}</p>
         <div>⭐️⭐️⭐️⭐️⭐️</div>
-        <button className={style.premium} onClick={openModal}>Sé Premium</button>
-        <br />
-        <br />
-        <button className={style.logout} onClick={logout}>
-          Salir
+        <button className={style.premium} onClick={openModal}>
+          Sé Premium
         </button>
+        <br />
+        <br />
+        <div>
+          {user && (
+            <button className={style.logout} onClick={loguotAuth0}>
+              Salir
+            </button>
+          )}
+          {!user && userData && (
+            <button className={style.logout} onClick={logout}>
+              Salir
+            </button>
+          )}
+        </div>
+        <PayModal isOpen={isModalOpen} onClose={closeModal} />
       </div>
-      <PayModal isOpen={isModalOpen} onClose={closeModal} />
     </>
   );
 };
