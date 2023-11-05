@@ -147,7 +147,6 @@ const App = () => {
                   userData={userData}
                   setAuth={setAuth}
                   toggleDarkMode={toggleDarkMode}
-                  installApp={handleInstallPWA}
                 />
               ) : (
                 <div className="spinner">
