@@ -10,7 +10,7 @@ import Banner4 from '../../assets/banner4.jpg'
 import style from "./MyProfile.module.css";
 
 
-const MyProfile = ({ userData, setAuth, toggleDarkMode }) => {
+const MyProfile = ({ userData, setAuth, toggleDarkMode}) => {
 
   return (
     <>
