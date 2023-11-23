@@ -1,9 +1,13 @@
 const { Post, User } = require("../DB_config");
+require("dotenv").config();
 const bcrypt = require('bcrypt');
 const { transporter } = require("../config/mailer")
 const { registerMail, passwordForgot} = require("../utils/mailObjects")
 const jwtGenerator = require("../utils/jwtGenerator")
 const nodemailer = require('nodemailer')
+const { ADMIN_USERS } = process.env;
+
+const adminList = ADMIN_USERS.split(", ")
 
 exports.getAllUser = async () => {
   try {
@@ -35,6 +39,19 @@ exports.getAllDisabled = async () => {
   }
 };
 
+exports.getAllExisting = async () => {
+  try {
+    const existingUsers = await User.findAll({
+      paranoid: false,
+      order: [['id', 'ASC']],
+    })
+
+    return existingUsers
+  } catch (error) {
+    throw "Ocurrió un error al traer los usuarios: " + error;
+  }
+};
+
 exports.createUser = async (user) => {
   if (
     !user.username ||
@@ -55,26 +72,73 @@ exports.createUser = async (user) => {
         username: user.username
       }
     });
-    if (existEmail.length !== 0 || existUsername.length !== 0) {
-      throw new Error("El email o usuario ya están en uso, prueba uno diferente.");
-    } else {
+    if (existEmail.length !== 0) {
+      throw new Error("El email ya se encuentra registrado");
+    } 
+    else if (existUsername.length !== 0) {
+      throw new Error("El nombre de usuario ya se encuentra registrado");
+    } 
+    // if (existEmail.length !== 0 && existUsername.length !== 0) {
+    //   throw new Error("El email y usuario ya están en uso, prueba uno diferente.");
+    // }
+    else {
       try {
         const saltRounds = 10;
         const salt = await bcrypt.genSalt(saltRounds);
         const password = user.password;
         const bcryptPassword = await bcrypt.hash(password, salt);
 
+        if(adminList.includes(user.email) && user.origin === "google"){
+          const newUser = await User.create({
+            username: user.username,
+            email: user.email,
+            password: bcryptPassword,
+            image: user.image,
+            ubication: user.ubication,
+            rol: "admin",
+            origin: "google"
+          });
+          const token = jwtGenerator(newUser.id)
+          await transporter.sendMail(registerMail(user))
+          return {newUser, token};
+        } else if(adminList.includes(user.email)){
+          const newUser = await User.create({
+            username: user.username,
+            email: user.email,
+            password: bcryptPassword,
+            image: user.image,
+            ubication: user.ubication,
+            rol: "admin"
+          });
+          const token = jwtGenerator(newUser.id)
+          await transporter.sendMail(registerMail(user))
+          return {newUser, token};
+        } else if(user.origin === "google"){
         const newUser = await User.create({
           username: user.username,
           email: user.email,
           password: bcryptPassword,
           image: user.image,
           ubication: user.ubication,
+          origin: user.origin
         });
-
         const token = jwtGenerator(newUser.id)
         await transporter.sendMail(registerMail(user))
         return {newUser, token};
+      } else {
+        const newUser = await User.create({
+          username: user.username,
+          email: user.email,
+          password: bcryptPassword,
+          image: user.image,
+          ubication: user.ubication,
+          origin: "google"
+        });
+        const token = jwtGenerator(newUser.id)
+        await transporter.sendMail(registerMail(user))
+        return {newUser, token};
+      }
+
       } catch (error) {
         throw new Error("Hubo un error al crear el usuario: " + error);
       }
@@ -133,9 +197,20 @@ exports.loginUser = async (user) => {
 exports.getUserId = async (user) => {
   try {
     const userId = await User.findByPk(user)
+
     return userId;
   } catch (error) {
     throw new Error("Error al iniciar sesión");
+  }
+}
+
+exports.getUserById = async (id) => {
+  try {
+    const user = await User.findByPk(id)
+
+    return user;
+  } catch (error) {
+    throw error;
   }
 }
 
@@ -229,8 +304,18 @@ exports.restoreUser = async (id) => {
     }
     
     await userDisabled.restore()
-    return "El usuario ha sido restaurado con éxito."
+    return userDisabled;
   } catch (error) {
     throw (error)
   }
 };
+
+exports.getAnotherUser= async (id) => {
+  try {
+    const userId = await User.findByPk(id)
+
+    return userId;
+  } catch (error) {
+    throw new Error("Error al iniciar sesión");
+  }
+}

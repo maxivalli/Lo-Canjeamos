@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import {
   selectCategory,
@@ -11,7 +11,6 @@ import {
   resetFilters,
 } from "../../redux/actions";
 import style from "./Filters.module.css";
-import { useEffect } from "react";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import imgBase from "../../assets/imgBase.jpg";
@@ -23,10 +22,8 @@ const Filters = () => {
   const dispatch = useDispatch();
   const allPostsCopy = useSelector((state) => state.allPostsCopy);
   const selectedImage = useSelector((state) => state.selectedPostImage);
-  
-  useEffect(() => {
-    dispatch(getAllPosts());
-  }, [dispatch]);
+
+
 
   const handleProvinceChange = (event) => {
     const province = event.target.value;
@@ -62,11 +59,22 @@ const Filters = () => {
   });
 
   // Obtener las provincias únicas
-  const provinces = Array.from(provinceToLocalityMap.keys());
+  const uniqueProvinces = () => {
+    const filteredPosts = allPostsCopy
+      .filter((post) => !selectedLocality || post.ubication.includes(selectedLocality))
+      .filter((post) => !selectedCategory || post.category === selectedCategory);
 
-  const uniqueCategories = [
-    ...new Set(allPostsCopy.map((post) => post.category)),
-  ];
+    return Array.from(new Set(filteredPosts.map((post) => post.ubication.split(", ")[0])));
+  };
+
+  // Obtener las categorías únicas basadas en la provincia, localidad y categoría seleccionadas
+  const uniqueCategories = () => {
+    const filteredPosts = allPostsCopy
+      .filter((post) => !selectedProvince || post.ubication.startsWith(selectedProvince))
+      .filter((post) => !selectedLocality || post.ubication.includes(selectedLocality));
+
+    return [...new Set(filteredPosts.map((post) => post.category))];
+  };
 
   const handleResetFilters = () => {
     dispatch(resetFilters());
@@ -97,10 +105,10 @@ const Filters = () => {
             />
           )}
         </Link>
-        <span>Filtros:</span>
+        <span>Filtros</span>
         <select value={selectedProvince} onChange={handleProvinceChange}>
-          <option value="">Provincia</option>
-          {provinces.map((province, index) => (
+          <option value="" disabled>Provincia</option>
+          {uniqueProvinces().map((province, index) => (
             <option key={index} value={province}>
               {province}
             </option>
@@ -108,7 +116,7 @@ const Filters = () => {
         </select>
 
         <select value={selectedLocality} onChange={handleLocalityChange}>
-          <option value="">Localidad</option>
+          <option value="" disabled>Localidad</option>
           {provinceToLocalityMap.get(selectedProvince) &&
             provinceToLocalityMap
               .get(selectedProvince)
@@ -120,8 +128,8 @@ const Filters = () => {
         </select>
 
         <select value={selectedCategory} onChange={handleCategoryChange}>
-          <option value="">Categoría</option>
-          {uniqueCategories.map((category, index) => (
+          <option value="" disabled>Categoría</option>
+          {uniqueCategories().map((category, index) => (
             <option key={index} value={category}>
               {category}
             </option>

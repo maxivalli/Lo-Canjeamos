@@ -17,6 +17,7 @@ const Cards = ({ allPosts }) => {
     variableWidth: true,
     className: "slider variable-width",
     slidesToScroll: 1,
+    arrows: false,
     responsive: [
       {
         breakpoint: 1280,
@@ -44,7 +45,9 @@ const Cards = ({ allPosts }) => {
     ],
   };
 
-  const sortedPosts = allPosts.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt)).slice(0, 20);
+  const sortedPosts = allPosts.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).slice(0, 20);
+
+  const premiumPosts = sortedPosts.filter(post => post.User && post.User.plan === "premium");
 
   return (
     <>
@@ -59,14 +62,15 @@ const Cards = ({ allPosts }) => {
         }}
         className={style.cards}
       >
-        <div>
+        <div className={style.masRec}>
           <span>Lo más destacado</span>{" "}
           <img src={fire} className={style.fire}></img>
         </div>
         <Slider {...settings}>
-          {sortedPosts &&
-            sortedPosts.map((post, index) => (
+          {premiumPosts &&
+            premiumPosts.map((post, index) => (
               <div key={index}>
+                <img width="32" height="32" src="https://img.icons8.com/color/48/guarantee.png" alt="guarantee" className={style.logo}/>
                 <Card key={post.id} post={post} />
               </div>
             ))}

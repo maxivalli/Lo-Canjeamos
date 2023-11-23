@@ -7,8 +7,11 @@ mercadopago.configure({
     access_token: ACCESS_TOKEN
 }) 
 
+let currentUserId;
+
 exports.createOrder = async (paymentData) => {
         const { userId, title, description, price } = paymentData
+        currentUserId = userId
     try{
         let preference = {
             items: [{
@@ -20,46 +23,42 @@ exports.createOrder = async (paymentData) => {
                 description: description,
             }],
             back_urls: {  // Corrected property name to 'back_urls'
-                failure: "https://lo-canjeamos-production.up.railway.app/login",
-                pending: "https://lo-canjeamos-production.up.railway.app/login",
-                success: "https://lo-canjeamos-production.up.railway.app/login"
-            }
+                failure: "https://locanjeamos.com.ar/#/login",
+                pending: "https://locanjeamos.com.ar/#/login",
+                success: "https://locanjeamos.com.ar/#/login"
+            },
+            notification_url: "https://lo-canjeamos-production.up.railway.app/plans/webhook"
         }
 
         const response = await mercadopago.preferences.create(preference);
 
         const respuesta = {response, userId};
+        
 
+        
         return respuesta
     } catch (error){
         res.status(400).json({error: error.message});
     }
 } 
 
-exports.successfullPurchase = async (purchaseUserId) => {
-try{
-    const user = await User.findByPk(purchaseUserId)
-    
-    const premiumNew = await user.update({
-        plan: "Premium"
-      });
+exports.webhook = async (data) => {
+    try {
+        if (data.type === "payment") {
+            const user = await User.findByPk(currentUserId)
 
-} catch (error){
-    res.status(400).json({error: error.message});
-}
-} 
-
-exports.pendingPurchase = async () => {
-    try{
-        res.status(200).send("La compra esta en estado pendiente")
-    } catch (error){
-        res.status(400).json({error: error.message});
-    }
-    } 
-    exports.failedPurchase = async () => {
-        try{
-            res.status(400).send("La compra a fallado")
-        } catch (error){
-            res.status(400).json({error: error.message});
+            const premiumNew = await user.update({
+                plan: "premium"
+            });
+            if(premiumNew){
+                return true
+            }
+        } else {
+            throw new Error("Invalid webhook event type");
         }
-        } 
+    } catch (error) {
+        return {
+            error: error.message
+        };
+    }
+}

@@ -1,10 +1,9 @@
 .chat {
   display: grid;
   min-width: 800px;
-  min-height: 800px;
+  height: 30vw;
   border-radius: 10px;
-  border: 2px solid #ffe66d;
-}
+ }
 
 .chat ul {
   padding: 0px;
@@ -19,17 +18,18 @@
   width: 800px;
   grid-template-columns: 1fr 5fr;
   background-color: #ffe66d;
-  border: 2px solid #ffe66d;
+  border-radius: 0px 0px 15px 15px;
 }
 
 .listMsg {
-  margin-top: 50px;
+  margin-top: 30px;
 }
 
 .user h3 {
   display: grid;
   align-self: center;
   justify-self: left;
+  margin-left: 10px;
   color: black;
   text-shadow: 0px 5px 10px rgba(0, 0, 0, 0.5);
 }
@@ -45,6 +45,7 @@
 
 .avatar {
   object-fit: cover;
+  justify-self: center;
   width: 60px;
   height: 60px;
   border: 3px solid #4ecdc4;
@@ -64,7 +65,7 @@
   margin: 20px;
   margin-bottom: 0px;
   background-color: #ffe66d;
-  border: 2px solid #ffe66d;
+  border-radius: 15px 15px 0px 0px ;
 }
 
 .chat input {
@@ -85,6 +86,7 @@
   background-color: #4ecdc4;
   height: 40px;
   width: 40px;
+ 
 }
 
 .myMessage {
@@ -102,8 +104,11 @@
   padding: 5px;
   border-radius: 10px 0px 10px 10px;
   width: fit-content;
+  max-width: 750px;
   justify-self: right;
+  text-align: justify;
   box-shadow: 0px 5px 10px rgba(128, 128, 128, 0.2);
+  word-break: break-all;
 }
 
 .myUserLabel {
@@ -111,6 +116,7 @@
   color: grey;
   height: 40px;
 }
+
 .otherUserLabel {
   display: grid;
   height: 40px;
@@ -121,23 +127,31 @@
 
 .otherMessage h5 {
   width: fit-content;
+  max-width: 750px;
   background-color: rgba(162, 0, 255, 0.6);
   color: whitesmoke;
   padding-left: 5px;
   padding: 5px;
   font-size: 16px;
   margin-left: 10px;
+  margin-right: 10px;
   margin-bottom: 15px;
   padding-right: 15px;
   border-radius: 0px 10px 10px 10px;
-  text-align: left;
+  text-align: justify;
   box-shadow: 0px 5px 10px rgba(128, 128, 128, 0.3);
+  word-break: break-all;
+  
 }
 
 @media (max-width: 768px) {
   .chat {
-    min-width: 350px;
+    min-width: 360px;
     border: none;
+  }
+
+  .listMsg {
+    margin-top: 50px;
   }
 
   .chat input {

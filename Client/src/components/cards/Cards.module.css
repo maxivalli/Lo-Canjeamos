@@ -2,6 +2,13 @@
   justify-self: center;
   width: 1200px;
   margin: 0;
+  margin-left: -10px;
+}
+
+.logo {
+  position: absolute;
+  margin-top: 15px;
+  margin-left: 15px;
 }
 
 .fire {
@@ -31,5 +38,9 @@
   .cards span {
     display: inline;
     font-size: 18px;
+  }
+
+  .masRec {
+    margin-bottom: 15px;
   }
 }

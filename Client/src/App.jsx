@@ -1,34 +1,33 @@
 /* eslint-disable no-unused-vars */
+import axios from "axios";
+import Swal from 'sweetalert2';
+
+import { useAuth0 } from "@auth0/auth0-react";
 import React, { useState, useEffect } from "react";
-import { Routes, Route, useLocation, useNavigate } from "react-router-dom";
-import { useSelector, useDispatch } from "react-redux";
-// import { useState, useEffect } from 'react';
+import { Routes, Route } from "react-router-dom";
+import OneSignal from 'react-onesignal';
 
 import AddProduct from "./views/addProduct/addProduct";
 import Chats from "./views/chats/Chats";
+import Messages from "./views/Messages/Messages";
 import Exchanges from "./views/exchanges/exchanges";
 import Home from "./views/home/Home";
 import Detail from "./views/detail/Detail";
 import Navbar from "./components/navbar/Nabvar";
 import MyProfile from "./views/myProfile/myProfile";
-
+import AdminDash from './views/adminDash/AdminDash';
 import Login from "./views/login/Login";
 import Register from "./components/register/Register";
 import Loading from "./views/loading/Loading";
 import ForgotPassword from "./components/forgotPassword/ForgotPassword";
 import ResetPassword from "./components/resetPassword/ResetPassword";
-import axios from "axios";
-import io from "socket.io-client";
-import Swal from 'sweetalert2';
+import UserProfile from "./views/userProfile/userProfile";
+
 import "./App.css";
+import ReviewForm from "./components/formReview/FormReview";
 
-const socketServer = io("http://localhost:3001/");
-//const socketServer = io("https://lo-canjeamos-production.up.railway.app/");
 
-//Actions
-import { getAllUsers, createGoogleUser } from "../src/redux/actions";
-//Auht0
-import { useAuth0 } from "@auth0/auth0-react";
+
 
 const App = () => {
   const initialDarkMode = localStorage.getItem("darkMode") === "true";
@@ -37,7 +36,6 @@ const App = () => {
 
   useEffect(() => {
     setDarkModeStyles(darkMode);
-
     localStorage.setItem("darkMode", darkMode);
   }, [darkMode]);
 
@@ -55,8 +53,9 @@ const App = () => {
     }
   };
 
-  axios.defaults.baseURL = "http://localhost:3001/";
-  // axios.defaults.baseURL = "https://lo-canjeamos-production.up.railway.app/";
+//axios.defaults.baseURL = "http://localhost:3001/";
+axios.defaults.baseURL = "https://lo-canjeamos-production.up.railway.app/";
+
   //*Auth0
   const { user, isAuthenticated: isAuthenticatedAuth0, loginWithRedirect, isLoading } = useAuth0();
 
@@ -71,7 +70,6 @@ const App = () => {
         origin: "google"
       };
       // que pregunte si ya existe el usuario, si existe que haga la request a la ruta de loguin y que si no existe haga a register
-
       try {
         const userLog = {
           email: userByGoogle.email
@@ -160,6 +158,9 @@ const App = () => {
                   id: userDataResponse.data.id,
                   username: userDataResponse.data.username,
                   image: userDataResponse.data.image,
+                  rol: userDataResponse.data.rol,
+                  averageRating: userDataResponse.data.averageRating,
+                  plan: userDataResponse.data.plan
                 });
               })
               .catch((userDataError) => {
@@ -181,11 +182,62 @@ const App = () => {
     }
   }, [isAuthenticated]);
 
+  //onesignal push notifications
+
+  useEffect(() => {
+    OneSignal.init({
+      appId: 'bd442249-142f-4367-9f32-0d10df4a3be1', 
+      notifyButton: {
+        enable: true,
+      },
+    });
+  }, [])
+
+  const [isPremium, setPremium] = useState(false);
+
+  if (userData && userData) {
+    const premium = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        const usuario = await axios.get("/users/userId", {
+          headers: {
+            token: token,
+          },
+          params: { id: userData.id },
+        });
+  
+        if (usuario.data.plan === "premium") {
+          setPremium(true);
+        }
+      } catch (error) {
+        console.error("Error al obtener la información del usuario:", error);
+      }
+    };
+    premium();
+  }
+
+  const sendMail = () => {
+    if(userData) {
+    OneSignal.User.addEmail(userData && userData.email || user && user.mail);
+    console.log(userData && userData.email || user && user.mail);
+    }
+    if (isPremium) {
+      OneSignal.User.addTag("subscription:", "premium");
+      console.log("isPremium: ", isPremium);
+    }
+    if (!isPremium) {
+      OneSignal.User.addTag("subscription:", "notPremium");
+      console.log("isPremium: ", isPremium);
+    }
+  };
+  
+  sendMail();
+
   return (
     <>
-      <Navbar isAuthenticated={isAuthenticated} setAuth={setAuth} />
+      <Navbar isAuthenticated={isAuthenticated} setAuth={setAuth} userData={userData}/>
       <Routes>
-        <Route path="/" element={<Home />} />
+        <Route path="/" element={<Home/>} />
 
         <Route path="/login" element={isAuthenticated ? (userData ? (<MyProfile userData={userData} setAuth={setAuth} toggleDarkMode={toggleDarkMode}/>
               ) : (
@@ -216,13 +268,23 @@ const App = () => {
         <Route path="/chats/:chatId" element={userData ? <Chats userData={userData} /> : <Loading />}/>
 
         <Route path="/register" element={isAuthenticated ? (userData && <MyProfile userData={userData} setAuth={setAuth}/>) : (<Register setAuth={setAuth}/>)}/>
+
+        <Route path="/review" element={userData ? (<ReviewForm userData={userData} />) : user ? (<ReviewForm userData={user} />) : (<Loading />)}/>
         
         <Route path="/forgotpassword" element={<ForgotPassword />} />
 
         <Route path="/resetpassword/:id" element={<ResetPassword />} />
+
+        <Route path="/messages" element={userData ? (<Messages userData={userData} />) : user ? (<Messages userData={user} />) : (<Loading />)}/>
+
+        <Route path="/admin" element={userData ? (<AdminDash></AdminDash>) : user ? (<AdminDash></AdminDash>) : (<Loading />)} />
+
+        <Route path="/UserProfile/:userId" element={<UserProfile id={userData}></UserProfile>} />
       </Routes>
     </>
   );
 };
 
-export { socketServer, App };
+export default App;
+
+//

@@ -1,15 +1,28 @@
 import axios from "axios";
 import {
   GET_ALL_USERS,
+  GET_ALL_DISABLED_USERS,
+  GET_ALL_EXISTING_USERS,
+  SORT_USER_BY_ID,
+  SORT_USER_BY_PLAN,
+  SORT_USER_BY_STATUS,
   GET_USER_BY_ID,
   CREATE_USER,
   UPDATE_USER,
   DELETE_USER,
+  RESTORE_USER,
+  RESET_USERS_FILTER,
   CARGAR_HISTORIAL_MENSAJES,
-  ADD_MESSAGE_TO_HISTORY,
   GET_ALL_MESSAGES,
+  OTHER_USER_DATA,
   GET_ALL_CHATS,
+  CHAT_CREATED,
   GET_ALL_POSTS,
+  GET_ALL_DISABLED_POSTS,
+  GET_ALL_EXISTING_POSTS,
+  SORT_POSTS_BY_ID,
+  SORT_POSTS_BY_STATUS,
+  RESET_POSTS_FILTER,
   GET_POST_BY_ID,
   SELECT_CATEGORY,
   SELECT_LOCALITY,
@@ -18,14 +31,19 @@ import {
   GET_POST_BY_PROVINCE,
   GET_POST_BY_LOCALITY,
   LIKE_POST,
+  LIKED_POSTS,
+  GET_ALL_LIKES,
+  DELETE_LIKE,
   GET_MATCHES,
   UPDATE_FILTERED_MATCHES,
   CREATE_POST,
   UPDATE_POST,
   DELETE_POST,
+  RESTORE_POST,
   SELECTED_POST,
   RESET_FILTERS,
   CLEAR_DETAIL,
+  ADD_REVIEW
 } from "./actionTypes";
 
 export function getAllUsers() {
@@ -33,6 +51,26 @@ export function getAllUsers() {
     const response = await axios("/users/allUsers");
     return dispatch({
       type: GET_ALL_USERS,
+      payload: response.data,
+    });
+  };
+}
+
+export function getAllDisabledUsers() {
+  return async function (dispatch) {
+    const response = await axios.get("/users/allDisabledUsers");
+    return dispatch({
+      type: GET_ALL_DISABLED_USERS,
+      payload: response.data,
+    });
+  };
+}
+
+export function getAllExistingUsers() {
+  return async function (dispatch) {
+    const response = await axios.get("/users/allExistingUsers");
+    return dispatch({
+      type: GET_ALL_EXISTING_USERS,
       payload: response.data,
     });
   };
@@ -48,7 +86,29 @@ export function getUserById(id) {
   };
 }
 
-export function createGoogleUser(user) {//* 
+export const sortUsersByID = (order) => {
+  return {
+    type: SORT_USER_BY_ID,
+    payload: order,
+  };
+};
+
+export const sortUsersByPlan = (plan) => {
+  return {
+    type: SORT_USER_BY_PLAN,
+    payload: plan,
+  };
+};
+
+export const sortUsersByStatus = (status) => {
+  return {
+    type: SORT_USER_BY_STATUS,
+    payload: status,
+  };
+};
+
+export function createGoogleUser(user) {
+
   console.log("actions entrega",user);
   return async (dispatch) => {
     const result = await axios.post(
@@ -92,11 +152,47 @@ export function deleteUser(id) {
   };
 }
 
+export function resetUsersFilter() {
+  return {
+    type: RESET_USERS_FILTER,
+  };
+}
+
+export function restoreUser(id) {
+  return async (dispatch) => {
+    const result = await axios.put(`/users/restoreUser/${id}`);
+    dispatch({
+      type: RESTORE_USER,
+      payload: result.data,
+    });
+  };
+}
+
 export function getAllPosts() {
   return async function (dispatch) {
     const response = await axios("/posts");
     return dispatch({
       type: GET_ALL_POSTS,
+      payload: response.data,
+    });
+  };
+}
+
+export function getAllDisabledPosts() {
+  return async function (dispatch) {
+    const response = await axios.get("/posts/allDisabledPosts");
+    return dispatch({
+      type: GET_ALL_DISABLED_POSTS,
+      payload: response.data,
+    });
+  };
+}
+
+export function getAllExistingPosts() {
+  return async function (dispatch) {
+    const response = await axios.get("/posts/allExistingPosts");
+    return dispatch({
+      type: GET_ALL_EXISTING_POSTS,
       payload: response.data,
     });
   };
@@ -119,23 +215,60 @@ export const likePost = (myUserId, likedPostId, myPostId, anotherUserId) => {
         myUserId: myUserId,
         likedPostId: likedPostId,
         myPostId: myPostId,
-        anotherUserId: anotherUserId
+        anotherUserId: anotherUserId,
       });
-      const likedPost = response.data;
+      const likedPost = response.data.like;
       dispatch({
         type: LIKE_POST,
-        payload: {
-        myUserId: myUserId,
-        likedPostId: likedPostId,
-        myPostId: myPostId,
-        anotherUserId: anotherUserId
-        },
+        payload: likedPost,
       });
+
+      // Almacenar el estado liked en el almacenamiento local
+      localStorage.setItem(`likedStatus_${likedPostId}`, 'true');
     } catch (error) {
       console.error("Error al dar like a la publicación", error);
     }
   };
 };
+
+export function saveOtherUserData(otherUserName, otherUserImage) {
+  return {
+    type: OTHER_USER_DATA,
+    payload: {
+      otherUserImage,
+      otherUserName
+    }
+  }
+}
+
+export function likedPosts(userId) {
+  return {
+    type: LIKED_POSTS,
+    payload: userId,
+  };
+}
+
+export function getAllLikes() {
+  return async function (dispatch) {
+    const response = await axios("/likes/allLikes");
+    return dispatch({
+      type: GET_ALL_LIKES,
+      payload: response.data,
+    });
+  };
+}
+
+export function deleteLike(likeId) {
+  return async (dispatch) => {
+    const result = await axios.delete(`/likes/${likeId}`);
+    console.log(result)
+    dispatch({
+      type: DELETE_LIKE,
+      payload: result.data,
+    });
+  };
+}
+
 
 export const clearDetail = () => {
   return async function (dispatch) {
@@ -245,6 +378,37 @@ export function deletePost(id) {
     });
   };
 }
+
+export function restorePost(id) {
+  return async (dispatch) => {
+    const result = await axios.put(`/posts/restorePost/${id}`);
+    dispatch({
+      type: RESTORE_POST,
+      payload: result.data,
+    });
+  };
+}
+
+export const sortPostsByID = (order) => {
+  return {
+    type: SORT_POSTS_BY_ID,
+    payload: order,
+  };
+};
+
+export const sortPostsByStatus = (status) => {
+  return {
+    type: SORT_POSTS_BY_STATUS,
+    payload: status,
+  };
+};
+
+export function resetPostsFilter() {
+  return {
+    type: RESET_POSTS_FILTER,
+  };
+}
+
 export function resetFilters() {
   return {
     type: RESET_FILTERS,
@@ -254,9 +418,7 @@ export function resetFilters() {
 export function messagesHistory(chatId) {
   return async (dispatch) => {
     try {
-      // Realiza una solicitud al servidor para obtener el historial de mensajes
       const response = await axios.get(`/messages/${chatId}`);
-
       dispatch({
         type: CARGAR_HISTORIAL_MENSAJES,
         payload: response.data
@@ -267,46 +429,40 @@ export function messagesHistory(chatId) {
   };
 }
 
-export function sendAndCreateMessage(chatId, senderId, content) {
-  return async (dispatch) => {
+export function createMessage(chatId, userId, content) {
+  return async () => {
     try {
-      const response = await axios.post(`/messages/${chatId}`, {
-        senderId,
-        content,
+      await axios.post(`/messages/${chatId}`, {
+        chatId,
+        userId,
+        content, 
       });
-
-      // Si la creación y el guardado del mensaje son exitosos, puedes realizar otras acciones aquí si es necesario.
-
-      return response.data; // Puedes retornar el mensaje creado si lo necesitas en tu aplicación.
     } catch (error) {
-      console.error("Error al crear y guardar el mensaje:", error);
-      throw error;
+      console.error("Error al crear el mensaje:", error);
     }
-  };
-}
-
-export function addMessageToHistory(newMessage) {
-  return {
-    type: ADD_MESSAGE_TO_HISTORY,
-    payload: newMessage,
   };
 }
 
 //CREAR CHAT
 export function createChat(userId, anotherUserId) {
-  return new Promise(async (resolve, reject) => {
+  return async (dispatch) => {
     try {
-      const response = await axios.post("/chats/create", {
-        userId,
-        anotherUserId,
-      });
-      const chatData = response.data; // Obtén los datos del chat recién creado
-      resolve(chatData); // Resuelve la promesa con los datos del chat
-    } catch (error) {
+    const chatId = await axios.post("/chats/create", {
+      userId,
+      anotherUserId,
+    })
+    dispatch({
+      type: CHAT_CREATED,
+      payload: { chatId: chatId.data, user1Id: userId, user2Id: anotherUserId },
+    });
+
+    return chatId.data
+
+  }catch (error) {
       console.error("Error al crear el chat:", error);
-      reject(error); // Rechaza la promesa en caso de error
+      throw error
     }
-  });
+  };
 }
 
 export function getAllChats() {

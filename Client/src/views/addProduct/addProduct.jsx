@@ -4,8 +4,6 @@ import React, { useState, useEffect, useCallback } from "react";
 import { useDropzone } from "react-dropzone";
 import {motion} from 'framer-motion';
 import Header from "../../components/header/Header";
-import Banner from "../../assets/banner1.jpg";
-import Banner2 from "../../assets/banner2.jpg";
 import style from "./AddProduct.module.css";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
@@ -266,8 +264,7 @@ setErrors({ ...errors, [name]: error });
         Swal.fire({
           title: "Errores en el formulario",
           text: errorMessage.join("\n"),
-          icon: "warning",
-          iconColor: 'red'
+          icon: "error",
         });
         setFormData({
           ...formData,
@@ -301,13 +298,13 @@ setErrors({ ...errors, [name]: error });
       if (response) {
         Swal.fire({
           icon: "success",
-          title: ">🎉 ¡Hecho! 🎉",
+          title: "🎉 ¡Hecho! 🎉",
           html: '<p>Tu publicación ha sido creada correctamente. Puedes verla en tu perfil o visualizarla en el inicio.</p>',
-        });
-        setTimeout(() => {
+          allowOutsideClick: false
+        }).then(() => {
           navigate("/login");
-          Swal.close()
-        }, 1500);
+
+           });
 
         setFiles([]);
         setSelectedCategory("");
@@ -322,14 +319,89 @@ setErrors({ ...errors, [name]: error });
         console.log("Hubo un error al crear la publicación.");
       }
     } catch (error) {
+
+      console.error("Error al enviar los datos al servidor:", error);
+      console.log("Hubo un error al crear la publicación.");
+
+      const handlePremium = async () => {
+        try {
+          let paymentData;
+      
+          if (userData) {
+            paymentData = {
+              userId: userData.id,
+              title: "Premium",
+              quantity: 1,
+              price: 1500,
+              currency_id: "ARG",
+              description: "Usuario premium",
+            };
+          } else {
+            paymentData = {
+              userId: user.id,
+              title: "Premium",
+              quantity: 1,
+              price: 1500,
+              currency_id: "ARG",
+              description: "Usuario premium",
+            };
+          }
+      
+          const response = await axios.post("/plans/create-order", paymentData);
+      
+          if (response) {
+            window.location.href = response.data.response.body.init_point;
+          } else {
+            console.error("Init point not found in the response");
+          }
+        } catch (error) {
+          console.error("Error al realizar solicitud de compra", error);
+        }
+      };
+
+      if (error.response && error.response.data && error.response.data.error) {
+        const errorMessage = error.response.data.error;
+        if (errorMessage === "Solo los usuarios premium pueden tener mas de una publicacion a la vez!") {
+          const payResponse = await Swal.fire({
+            title: "¡Ups!",
+            text: "Solo los usuarios premium pueden tener más de una publicación a la vez.",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonText: "Hacerse Premium",
+            cancelButtonText: "Cancelar",
+            reverseButtons: true,
+            preConfirm: () => {
+              handlePremium(true);
+            },
+          });
+    
+          if (payResponse.dismiss === Swal.DismissReason.cancel) {
+            Swal.fire({
+              icon: 'info',
+              title: 'Acción cancelada',
+              text: 'No te has vuelto Premium. Si decides hacerlo más tarde, ¡siempre estamos aquí!',
+            });
+          }
+        } else {
+          Swal.fire({
+            icon: 'warning',
+            title: 'Usuario Premium',
+            text: errorMessage,
+          });
+        }
+      } else {
+        console.error("Error inesperado:", error);
+      }
+    
       setFormData({
         ...formData,
         disabled: false,
-      })
-      console.error("Error al enviar los datos al servidor:", error);
-      console.log("Hubo un error al crear la publicación.");
+      });
     }
   };
+
+  const Banner = "https://res.cloudinary.com/dlahgnpwp/image/upload/v1699885578/emailAssets/er00zffd102eyze13aug.jpg";
+  const Banner2 = "https://res.cloudinary.com/dlahgnpwp/image/upload/v1699885578/emailAssets/cyzzxxg8vkfxaqzolq9m.jpg";
 
   return (
     <>
@@ -450,3 +522,4 @@ setErrors({ ...errors, [name]: error });
     </>
   );
 }
+

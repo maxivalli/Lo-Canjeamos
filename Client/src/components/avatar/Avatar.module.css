@@ -4,7 +4,30 @@
   border-radius: 10px;
 }
 
-.avatar img {
+.avatarPremium{
+  padding: 30px;
+  box-shadow: 0px 5px 10px rgba(125, 125, 125, 0.3);
+  border-radius: 10px;
+  border: 2px solid goldenrod;
+}
+
+.logo {
+  display: inline;
+  position: absolute;
+  margin-left: -28px;
+  margin-top: 40px;
+  border: none;
+}
+
+.photo {
+  width: 60px;
+  height: 60px;
+  object-fit: cover;
+  border-radius: 50%;
+  border: 3px solid #4ecdc4;
+}
+
+.avatarPremium .photo {
   width: 60px;
   height: 60px;
   object-fit: cover;
@@ -16,7 +39,37 @@
   margin: 5px;
 }
 
+.avatar h4 {
+  color: #4ecdc4;
+  margin: 0;
+}
+
+.avatarPremium h4 {
+  color: #4ecdc4;
+  margin: 0;
+}
+
+.avatarPremium h3 {
+  margin: 5px;
+}
+
 .avatar p {
+  margin: 5px;
+}
+
+.avatar a {
+  position: absolute;
+  margin-left: 300px;
+  margin-top: -20px;
+}
+
+.avatarPremium a {
+  position: absolute;
+  margin-left: 300px;
+  margin-top: -20px;
+}
+
+.avatarPremium p {
   margin: 5px;
 }
 
@@ -24,7 +77,11 @@
   text-shadow: 0px 5px 10px rgba(124, 123, 123, 0.3);
 }
 
-.avatar .premium {
+.avatarPremium div {
+  text-shadow: 0px 5px 10px rgba(124, 123, 123, 0.3);
+}
+
+.premium {
   background-color: goldenrod;
   padding: 5px;
   margin-top: 15px;
@@ -33,11 +90,29 @@
   font-size: 14px;
 }
 
+.premium:disabled {
+  background-color: gray;
+  cursor: not-allowed;
+  opacity: 0.6;
+  width: 90px;
+}
+
+/* .avatarPremium .premium {
+  background-color: goldenrod;
+  padding: 5px;
+  margin-top: 15px;
+  box-shadow: 0px 5px 10px rgba(125, 125, 125, 0.3);
+  color: whitesmoke;
+  font-size: 14px;
+} */
+
 .dark {
   width: 90px;
   height: 32px;
   background-color: black;
   padding: 5px;
+  padding-bottom: 3px;
+  padding-top: 1px;
   margin-top: 15px;
   margin-bottom: 10px;
   box-shadow: 0px 5px 10px rgba(125, 125, 125, 0.3);
@@ -50,6 +125,8 @@
   height: 32px;
   background-color: white;
   padding: 5px;
+  padding-bottom: 3px;
+  padding-top: 2px;
   margin-top: 15px;
   margin-bottom: 10px;
   box-shadow: 0px 5px 10px rgba(125, 125, 125, 0.3);
@@ -65,9 +142,21 @@
   font-size: 14px;
   width: 93px;
 }
-
+.avatarPremium .logout {
+  background-color: #ff6b6b;
+  padding: 5px;
+  box-shadow: 0px 5px 10px rgba(125, 125, 125, 0.3);
+  color: whitesmoke;
+  font-size: 14px;
+  width: 93px;
+}
 @media (max-width: 768px) {
   .avatar {
+    width: 240px;
+    justify-self: center;
+  }
+
+  .avatarPremium {
     width: 240px;
     justify-self: center;
   }
@@ -78,5 +167,25 @@
 
   .light {
     padding-top: 3px;
+  }
+
+  .avatar a {
+    position: absolute;
+    margin-left: 220px;
+    margin-top: -20px;
+  }
+
+  .avatarPremium a {
+    position: absolute;
+    margin-left: 220px;
+    margin-top: -20px;
+  }
+
+  .avatar span {
+    display: inline-flex;
+  }
+
+  .avatarPremium span {
+    display: inline-flex;
   }
 }

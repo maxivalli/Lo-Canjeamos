@@ -1,6 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
 import Logo from "../../assets/locan.png";
-import smile from "../../assets/smile.gif";
 import style from "./Nabvar.module.css";
 //Auth0
 import { useAuth0 } from "@auth0/auth0-react";
@@ -9,6 +8,7 @@ const NavBar = ({ isAuthenticated, setAuth, userData }) => {
   
   const location = useLocation();
   const { user, isAuthenticated: isAuthenticatedAuth0, logout: loguotAuth0 } = useAuth0();
+  
 
   const logout = () => {
     localStorage.removeItem("token");
@@ -116,9 +116,9 @@ const NavBar = ({ isAuthenticated, setAuth, userData }) => {
 
       {isAuthenticated || isAuthenticatedAuth0 ? (
         <Link
-          to="/chats"
+          to="/messages"
           className={`${style.link} ${
-            location.pathname === "/chats" ? style.active : ""
+            location.pathname === "/messages" ? style.active : ""
           }`}
         >
           <button className={style.iconos}>
@@ -132,7 +132,7 @@ const NavBar = ({ isAuthenticated, setAuth, userData }) => {
           </button>
         </Link>
       ) : (
-        <Link to="/chats">
+        <Link to="/messages">
           <button className={style.iconosFalse}>
             <img
               width="24"
@@ -153,13 +153,8 @@ const NavBar = ({ isAuthenticated, setAuth, userData }) => {
       >
         {isAuthenticated || isAuthenticatedAuth0 ? (
           <button className={style.iconos}>
-            <img
-              width="24"
-              height="24"
-              src="https://img.icons8.com/puffy/32/experimental-user-puffy.png"
-              alt="Usuario"
-            />
-            Perfil
+            <img src={(user && user.picture) || (userData && userData.image)} width="24" height="24" className={style.avatar}></img>
+            {(user && user.name) || (userData && userData.username)}
           </button>
         ) : (
           <button className={style.iconos}>
