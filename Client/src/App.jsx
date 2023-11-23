@@ -277,7 +277,8 @@ axios.defaults.baseURL = "https://lo-canjeamos-production.up.railway.app/";
 
         <Route path="/messages" element={userData ? (<Messages userData={userData} />) : user ? (<Messages userData={user} />) : (<Loading />)}/>
 
-        <Route path="/admin" element={<AdminDash></AdminDash>} />
+        <Route path="/admin" element={userData ? (<AdminDash></AdminDash>) : user ? (<AdminDash></AdminDash>) : (<Loading />)} />
+
         <Route path="/UserProfile/:userId" element={<UserProfile id={userData}></UserProfile>} />
       </Routes>
     </>
