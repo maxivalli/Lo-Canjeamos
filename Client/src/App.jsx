@@ -54,7 +54,7 @@ const App = () => {
   };
 
 //axios.defaults.baseURL = "http://localhost:3001/";
-axios.defaults.baseURL = "https://lo-canjeamos-p6yva13o8-maxivallis-projects.vercel.app/";
+axios.defaults.baseURL = "https://lo-canjeamos.vercel.app/";
 
   //*Auth0
   const { user, isAuthenticated: isAuthenticatedAuth0, loginWithRedirect, isLoading } = useAuth0();
