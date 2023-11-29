@@ -22,7 +22,7 @@ const ChatsMessages = ({ chatId, userData }) => {
     query: { chatId },
   }); */
 
-  const socketServer = io("https://lo-canjeamos-production.up.railway.app/", {
+  const socketServer = io("https://lo-canjeamos.vercel.app/", {
     query: { chatId },
   });
 
