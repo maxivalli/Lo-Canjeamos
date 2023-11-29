@@ -13,15 +13,8 @@ const { DB_USER, DB_PASSWORD, DB_HOST, DB_DEPLOY } = process.env;
 );  */
 
 const sequelize = new Sequelize(DB_DEPLOY, {
-  logging: false,
-  native: false,
-  dialect: "postgres",
-  dialectOptions: {
-    ssl: {
-      require: true,
-      rejectUnauthorized: false,
-    },
-  },
+   logging: false,
+   native: false,
 });
 
 const basename = path.basename(__filename);
@@ -83,15 +76,17 @@ Message.belongsTo(User, {
 });
 
 User.hasMany(Review, {
-  foreignKey: "userId",
+  foreignKey: 'userId' 
 });
 
 Review.belongsTo(User, {
-  as: "reviewer",
-  foreignKey: "reviewedUserId",
+  as: 'reviewer',
+  foreignKey: 'reviewedUserId' 
 });
 
 module.exports = {
   ...sequelize.models,
   conn: sequelize,
 };
+
+//
