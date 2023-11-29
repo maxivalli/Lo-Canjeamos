@@ -27,7 +27,7 @@ exports.createOrder = async (paymentData) => {
                 pending: "https://locanjeamos.com.ar/#/login",
                 success: "https://locanjeamos.com.ar/#/login"
             },
-            notification_url: "https://lo-canjeamos-production.up.railway.app/plans/webhook"
+            notification_url: "https://locanjeamos-server.onrender.com/plans/webhook"
         }
 
         const response = await mercadopago.preferences.create(preference);
